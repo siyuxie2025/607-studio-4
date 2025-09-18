@@ -1,8 +1,15 @@
 import pytest
+
 import numpy as np
+
 from bootstrap import bootstrap_sample, bootstrap_ci, r_squared
 
-class TestBootstrap:
+def test_bootstrap_integration():
+        """Test that bootstrap_sample and bootstrap_ci work together"""
+        # This test should initially fail
+pass
+
+class TestBootstrapRSquared:
     """
     Test for bootstrap functions
     """
@@ -16,6 +23,7 @@ class TestBootstrap:
         
         r2 = r_squared(X, y)
         assert abs(r2 - 1.0) < 1e-10, "Should have R² ≈ 1"
+
 
     def test_r_squared_function_edge_cases(self):
         """
@@ -31,6 +39,7 @@ class TestBootstrap:
         with pytest.raises(ValueError, match="Number of samples in X and y must be the same."):
             r_squared(np.array([[1, 1], [1, 2]]), np.array([1, 2, 3]))
 
+
         # Small sample size
         with pytest.raises(ValueError, match="Number of samples must be greater than number of features."):
             r_squared(np.array([[1, 1], [1, 2]]), np.array([1, 2])) 
@@ -39,6 +48,8 @@ class TestBootstrap:
         with pytest.raises(ValueError, match="X must include at least one feature and an intercept."):
             r_squared(np.array([[1], [2], [3]]), np.array([1, 2, 3]))
 
+class TestBootstrapCI:
+    """ Test suite for bootstrap_ci function """
     
     def test_bootstrap_ci_basic(self):
         """
@@ -97,3 +108,77 @@ class TestBootstrap:
         two_stats = np.array([1.0, 9.0])
         lower, upper = bootstrap_ci(two_stats, alpha=0.05)
         assert lower <= upper, "Even with two values, lower ≤ upper"
+
+class TestBootstrapSample:
+    """Test suite for bootstrap functions"""
+    
+    def test_bootstrap_sample_happy_path(self):
+        """Test basic functionality of bootstrap_sample."""
+        X = np.array([[1], [2], [3], [4], [5]])
+        y = np.array([1, 2, 3, 4, 5])
+        
+        def compute_stat(X, y):
+            return np.mean(y)
+    
+        stats = bootstrap_sample(X, y, compute_stat, n_bootstrap=1000)
+
+        assert len(stats) == 1000
+        assert abs(np.mean(stats) - np.mean(y)) < 0.1  # Mean should be close to original mean
+    
+
+
+def test_bootstrap_sample_invalidg_inputs():
+    """
+    Test that bootstrap_sample raises errors on invalid inputs
+    """
+    if len(X) != len(y):
+        raise ValueError("Number of samples in X and y must be the same.")
+    if n_bootstrap <= 0:
+        raise ValueError("n_bootstrap must be a positive integer.")
+    if not callable(compute_stat):
+        raise ValueError("compute_stat must be a callable function.")
+    
+    pytest.raises(ValueError, bootstrap_sample, X, y, compute_stat, n_bootstrap=-10)
+    pytest.raises(ValueError, bootstrap_sample, X, y, compute_stat, n_bootstrap=0)
+    pytest.raises(ValueError, bootstrap_sample, X, y, compute_stat, n_bootstrap=1.5)
+
+    pass
+
+def test_bootstrap_ci_invalid_inputs():
+    """
+    Test that bootstrap_ci raises errors on invalid inputs
+    """
+    if not (0 < alpha < 1):
+        raise ValueError("alpha must be between 0 and 1.")
+    
+    pytest.raises(ValueError, bootstrap_ci, np.array([1,2,3]), alpha=-0.1)
+    pytest.raises(ValueError, bootstrap_ci, np.array([1,2,3]), alpha=0)
+    pytest.raises(ValueError, bootstrap_ci, np.array([1,2,3]), alpha=1)
+    pytest.raises(ValueError, bootstrap_ci, np.array([1,2,3]), alpha=1.5)
+
+    pass 
+
+def test_r_squared_invalid_inputs():
+    """
+    Test that r_squared raises errors on invalid inputs
+    """
+    X = np.array([[1, 2], [3, 4]])
+    y = np.array([1, 2, 3])  # Mismatched length
+
+    with pytest.raises(ValueError, match = 'mismatched length'):
+        r_squared(X, y)
+
+    X = np.array([[1, 2], [3, 4]])
+    y = np.array([1, 2])  # Valid length but not enough samples
+
+    with pytest.raises(ValueError, match = 'not enough samples'):
+        r_squared(X, y)
+
+    X = np.array([[1], [2], [3]])  # Not enough features
+    y = np.array([1, 2, 3])
+
+    with pytest.raises(ValueError, match = 'not enough features'):
+        r_squared(X, y)
+
+
+    pass

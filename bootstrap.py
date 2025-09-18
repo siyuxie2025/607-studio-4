@@ -1,3 +1,9 @@
+from sklearn.linear_model import LinearRegression
+import numpy as np
+import pytest
+
+
+
 """
 Strong linear model in regression
     Y = X beta + eps, where eps~ N(0, sigma^2 I)

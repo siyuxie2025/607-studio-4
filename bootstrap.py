@@ -1,4 +1,8 @@
 
+
+from sklearn.linear_model import LinearRegression
+
+
 """
 Strong linear model in regression
     Y = X beta + eps, where eps~ N(0, sigma^2 I)
@@ -7,6 +11,7 @@ Strong linear model in regression
     (if you have an intercept beta_0), 
         R^2 ~ Beta(p/2, (n-p-1)/2)
 """
+
 import numpy as np
 
 def bootstrap_sample(X, y, compute_stat, n_bootstrap=1000):
@@ -46,6 +51,7 @@ def bootstrap_sample(X, y, compute_stat, n_bootstrap=1000):
         bootstrap_stats[i] = compute_stat(X_boot, y_boot)
     
     return bootstrap_stats
+
 
 # def compute_stat(X,y):
 #     """
@@ -89,6 +95,11 @@ def bootstrap_ci(bootstrap_stats, alpha=0.05):
     
     ....
     """
+
+    lower_bound = np.percentile(bootstrap_stats, 100 * (alpha / 2))
+    upper_bound = np.percentile(bootstrap_stats, 100 * (1 - alpha / 2))
+    return (lower_bound, upper_bound)
+
     pass
 
 def R_squared(X, y):
@@ -111,4 +122,18 @@ def R_squared(X, y):
     ValueError
         If X.shape[0] != len(y)
     """
+
+    if X.shape[0] != len(y):
+        raise ValueError("Number of samples in X and y must be the same.")
+    if X.shape[0] <= X.shape[1]:
+        raise ValueError("Number of samples must be greater than number of features.")
+    if X.shape[1] < 2:
+        raise ValueError("X must include at least one feature and an intercept.")
+    
+    model = LinearRegression().fit(X, y)
+    r2_original = model.score(X, y)
+
+    return r2_original
+    
+
     pass

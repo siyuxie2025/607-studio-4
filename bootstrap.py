@@ -1,5 +1,7 @@
 
+
 from sklearn.linear_model import LinearRegression
+
 
 """
 Strong linear model in regression
@@ -10,6 +12,7 @@ Strong linear model in regression
         R^2 ~ Beta(p/2, (n-p-1)/2)
 """
 
+import numpy as np
 
 def bootstrap_sample(X, y, compute_stat, n_bootstrap=1000):
     """
@@ -49,6 +52,31 @@ def bootstrap_sample(X, y, compute_stat, n_bootstrap=1000):
     
     return bootstrap_stats
 
+
+# def compute_stat(X,y):
+#     """
+#     Example statistic function: R-squared from linear regression
+
+#     Parameters
+#     ----------
+#     X : array-like, shape (n, p+1)
+#         Design matrix
+#     y : array-like, shape (n,)
+
+#     Returns
+#     -------
+#     float
+#         R-squared value from OLS
+#     """
+#     # Fit linear model using least squares
+#     beta_hat = np.linalg.lstsq(X, y, rcond=None)[0]
+#     y_pred = X @ beta_hat
+#     ss_total = np.sum((y - np.mean(y))**2)
+#     ss_residual = np.sum((y - y_pred)**2)
+    
+#     r_squared = 1 - ss_residual / ss_total
+#     return r_squared
+
 def bootstrap_ci(bootstrap_stats, alpha=0.05):
     """
     Calculate confidence interval from the bootstrap samples
@@ -67,6 +95,7 @@ def bootstrap_ci(bootstrap_stats, alpha=0.05):
     
     ....
     """
+
     lower_bound = np.percentile(bootstrap_stats, 100 * (alpha / 2))
     upper_bound = np.percentile(bootstrap_stats, 100 * (1 - alpha / 2))
     return (lower_bound, upper_bound)

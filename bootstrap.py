@@ -1,5 +1,8 @@
 
 from sklearn.linear_model import LinearRegression
+import numpy as np
+import pytest
+
 
 """
 Strong linear model in regression
@@ -67,6 +70,7 @@ def bootstrap_ci(bootstrap_stats, alpha=0.05):
     
     ....
     """
+
     lower_bound = np.percentile(bootstrap_stats, 100 * (alpha / 2))
     upper_bound = np.percentile(bootstrap_stats, 100 * (1 - alpha / 2))
     return (lower_bound, upper_bound)

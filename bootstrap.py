@@ -7,7 +7,7 @@ Strong linear model in regression
     (if you have an intercept beta_0), 
         R^2 ~ Beta(p/2, (n-p-1)/2)
 """
-
+import numpy as np
 
 def bootstrap_sample(X, y, compute_stat, n_bootstrap=1000):
     """
@@ -30,7 +30,46 @@ def bootstrap_sample(X, y, compute_stat, n_bootstrap=1000):
 
     ....
     """
-    pass
+    X = np.array(X)
+    y = np.array(y)
+    n = len(y)
+    
+    bootstrap_stats = np.zeros(n_bootstrap)
+    
+    for i in range(n_bootstrap):
+        # Sample with replacement
+        indices = np.random.choice(n, size=n, replace=True)
+        X_boot = X[indices]
+        y_boot = y[indices]
+        
+        # Compute the statistic on bootstrap sample
+        bootstrap_stats[i] = compute_stat(X_boot, y_boot)
+    
+    return bootstrap_stats
+
+# def compute_stat(X,y):
+#     """
+#     Example statistic function: R-squared from linear regression
+
+#     Parameters
+#     ----------
+#     X : array-like, shape (n, p+1)
+#         Design matrix
+#     y : array-like, shape (n,)
+
+#     Returns
+#     -------
+#     float
+#         R-squared value from OLS
+#     """
+#     # Fit linear model using least squares
+#     beta_hat = np.linalg.lstsq(X, y, rcond=None)[0]
+#     y_pred = X @ beta_hat
+#     ss_total = np.sum((y - np.mean(y))**2)
+#     ss_residual = np.sum((y - y_pred)**2)
+    
+#     r_squared = 1 - ss_residual / ss_total
+#     return r_squared
 
 def bootstrap_ci(bootstrap_stats, alpha=0.05):
     """

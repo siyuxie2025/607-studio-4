@@ -1,5 +1,7 @@
 import pytest
+
 import numpy as np
+
 from bootstrap import bootstrap_sample, bootstrap_ci, r_squared
 
 def test_bootstrap_integration():
@@ -8,6 +10,40 @@ def test_bootstrap_integration():
     
 
 # TODO: Add your unit tests here
+
+class TestBootstrap:
+    """Test suite for bootstrap functions"""
+    
+    def test_bootstrap_sample_happy_path(self):
+        """Test basic functionality of bootstrap_sample."""
+        X = np.array([[1], [2], [3], [4], [5]])
+        y = np.array([1, 2, 3, 4, 5])
+        
+        def compute_stat(X, y):
+            return np.mean(y)
+    
+        stats = bootstrap_sample(X, y, compute_stat, n_bootstrap=1000)
+
+        assert len(stats) == 1000
+        assert abs(np.mean(stats) - np.mean(y)) < 0.1  # Mean should be close to original mean
+    
+    def test_bootstrap_ci_happy_path(self):
+        """Test basic functionality of bootstrap_ci."""
+        bootstrap_stats = np.random.normal(loc=0, scale=1, size=1000)
+        ci_lower, ci_upper = bootstrap_ci(bootstrap_stats, alpha=0.05)
+        
+        assert ci_lower < ci_upper
+        assert abs(ci_lower) < 3  # Rough bounds for normal distribution
+        assert abs(ci_upper) < 3
+
+    def test_r_squared_happy_path(self):
+        """Test basic functionality of r_squared."""
+        X = np.array([[1, 1], [1, 2], [1, 3], [1, 4], [1, 5]])
+        y = np.array([1, 2, 3, 4, 5])
+        
+        r2 = r_squared(X, y)
+        assert abs(r2 - 1.0) < 1e-10  # Perfect fit
+
 
 def test_bootstrap_sample_invalidg_inputs():
     """

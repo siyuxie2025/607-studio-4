@@ -182,3 +182,61 @@ def test_r_squared_invalid_inputs():
 
 
     pass
+
+
+class RSquaredDistribution:
+    """
+    Validate the theoretical distribution of R-squared aligns with empirical bootstrap results.
+    Y = X beta + eps, where eps~ N(0, sigma^2 I)
+    Under the null where beta_1 = ... = beta_p = 0,
+    the R-squared coefficient has a known distribution
+    (if you have an intercept beta_0), 
+        R^2 ~ Beta(p/2, (n-p-1)/2)
+    """
+    from scipy import stats
+    import matplotlib.pyplot as plt
+    from bootstrap import bootstrap_sample, r_squared
+
+    def test_r_squared_theoretical_distribution():
+        """
+        Test that bootstrap R² follows the theoretical Beta distribution under null hypothesis.
+    
+        Under H0: all beta coefficients = 0 (except intercept), 
+        R² ~ Beta(p/2, (n-p-1)/2) where p = number of predictors (excluding intercept)
+        """
+        
+        # Set up the test parameters
+        np.random.seed(42)
+        n = 100          # sample size
+        p = 3            # number of predictors (excluding intercept)
+    
+        # Create data under NULL hypothesis
+        # X has intercept + p predictors, y is pure noise
+        X = np.column_stack([
+            np.ones(n),                    # intercept column
+            np.random.randn(n, p)          # p random predictors
+        ])
+        y = np.random.randn(n)             # pure noise (no relationship with X)
+    
+        # Theoretical Beta distribution parameters under null
+        # R² ~ Beta(p/2, (n-p-1)/2)
+        alpha_theory = p / 2               # shape parameter 1
+        beta_theory = (n - p - 1) / 2      # shape parameter 2
+    
+        bootstrap_r_squared = bootstrap_sample(X, y, r_squared)
+
+        # Statistical testing using Kolmogorov-Smirnov test
+        # H0: bootstrap samples come from theoretical Beta distribution
+        # H1: they don't come from Beta distribution
+
+        ks_statistic, p_value = stats.kstest(
+            bootstrap_r_squared, 
+            lambda x: stats.beta.cdf(x, alpha_theory, beta_theory)
+        )
+        
+        print(f"Kolmogorov-Smirnov test:")
+        print(f"  KS statistic: {ks_statistic:.4f}")
+        print(f"  p-value: {p_value:.4f}")
+        
+        # confidence level 95%
+        assert p_value > 0.05, f"Bootstrap R² match theoretical distribution (p={p_value:.4f})"

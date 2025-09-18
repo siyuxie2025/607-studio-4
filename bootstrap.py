@@ -120,7 +120,7 @@ def bootstrap_ci(bootstrap_stats, alpha=0.05):
     return (lower_bound, upper_bound)
 
 
-def R_squared(X, y):
+def r_squared(X, y):
     """
     Calculate R-squared from multiple linear regression.
 

@@ -1,8 +1,8 @@
-
-
 from sklearn.linear_model import LinearRegression
 import numpy as np
 import pytest
+
+import warnings
 
 
 
@@ -15,7 +15,6 @@ Strong linear model in regression
         R^2 ~ Beta(p/2, (n-p-1)/2)
 """
 
-import numpy as np
 
 def bootstrap_sample(X, y, compute_stat, n_bootstrap=1000):
     """
@@ -42,13 +41,25 @@ def bootstrap_sample(X, y, compute_stat, n_bootstrap=1000):
     if not isinstance(n_bootstrap, int) or n_bootstrap <= 0:
         raise ValueError("n_bootstrap must be a positive integer")
     
-    if not isinstance(X, (np.ndarray, list)) or not isinstance(y, (np.ndarray, list)):
-        raise ValueError("X and y must be array-like")
+    if not isinstance(X, (np.ndarray, list)):
+        raise ValueError("X must be array-like")
 
-    X = np.array(X)
-    y = np.array(y)
-    n = len(y)
+    if not isinstance(y, (np.ndarray, list)):
+        raise ValueError("y must be array-like")
     
+
+    if X.shape[0] != len(y):
+        raise ValueError(f"X and y must have same length")
+    
+    # Check for missing values(nans)
+    if np.any(np.isnan(X)) or np.any(np.isnan(y)):
+        raise ValueError("Cannot perform bootstrap with missing values (NaN)")
+    
+    # Check sample size
+    if X.shape[0] < 2:
+        warnings.warn("Small sample size may lead to unreliable bootstrap estimates.", UserWarning)
+
+    n = len(y)
     bootstrap_stats = np.zeros(n_bootstrap)
     
     for i in range(n_bootstrap):
@@ -86,7 +97,6 @@ def bootstrap_ci(bootstrap_stats, alpha=0.05):
     upper_bound = np.percentile(bootstrap_stats, 100 * (1 - alpha / 2))
     return (lower_bound, upper_bound)
 
-    pass
 
 def R_squared(X, y):
     """
@@ -120,6 +130,3 @@ def R_squared(X, y):
     r2_original = model.score(X, y)
 
     return r2_original
-    
-
-    pass

@@ -38,6 +38,13 @@ def bootstrap_sample(X, y, compute_stat, n_bootstrap=1000):
 
     ....
     """
+
+    if not isinstance(n_bootstrap, int) or n_bootstrap <= 0:
+        raise ValueError("n_bootstrap must be a positive integer")
+    
+    if not isinstance(X, (np.ndarray, list)) or not isinstance(y, (np.ndarray, list)):
+        raise ValueError("X and y must be array-like")
+
     X = np.array(X)
     y = np.array(y)
     n = len(y)
@@ -55,30 +62,6 @@ def bootstrap_sample(X, y, compute_stat, n_bootstrap=1000):
     
     return bootstrap_stats
 
-
-# def compute_stat(X,y):
-#     """
-#     Example statistic function: R-squared from linear regression
-
-#     Parameters
-#     ----------
-#     X : array-like, shape (n, p+1)
-#         Design matrix
-#     y : array-like, shape (n,)
-
-#     Returns
-#     -------
-#     float
-#         R-squared value from OLS
-#     """
-#     # Fit linear model using least squares
-#     beta_hat = np.linalg.lstsq(X, y, rcond=None)[0]
-#     y_pred = X @ beta_hat
-#     ss_total = np.sum((y - np.mean(y))**2)
-#     ss_residual = np.sum((y - y_pred)**2)
-    
-#     r_squared = 1 - ss_residual / ss_total
-#     return r_squared
 
 def bootstrap_ci(bootstrap_stats, alpha=0.05):
     """

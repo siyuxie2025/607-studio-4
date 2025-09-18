@@ -32,7 +32,22 @@ def bootstrap_sample(X, y, compute_stat, n_bootstrap=1000):
 
     ....
     """
-    pass
+    X = np.array(X)
+    y = np.array(y)
+    n = len(y)
+    
+    bootstrap_stats = np.zeros(n_bootstrap)
+    
+    for i in range(n_bootstrap):
+        # Sample with replacement
+        indices = np.random.choice(n, size=n, replace=True)
+        X_boot = X[indices]
+        y_boot = y[indices]
+        
+        # Compute the statistic on bootstrap sample
+        bootstrap_stats[i] = compute_stat(X_boot, y_boot)
+    
+    return bootstrap_stats
 
 def bootstrap_ci(bootstrap_stats, alpha=0.05):
     """
@@ -52,7 +67,9 @@ def bootstrap_ci(bootstrap_stats, alpha=0.05):
     
     ....
     """
-
+    lower_bound = np.percentile(bootstrap_stats, 100 * (alpha / 2))
+    upper_bound = np.percentile(bootstrap_stats, 100 * (1 - alpha / 2))
+    return (lower_bound, upper_bound)
 
     pass
 
@@ -86,7 +103,7 @@ def R_squared(X, y):
     
     model = LinearRegression().fit(X, y)
     r2_original = model.score(X, y)
-    
+
     return r2_original
     
 
